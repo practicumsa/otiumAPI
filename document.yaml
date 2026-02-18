@@ -1,33 +1,26 @@
 openapi: 3.0.0
 servers:
   - description: Otium Mock
-    url: https://7cc189c1-def1-4b43-beb1-4a3d04d37ad7.mock.pstmn.io/
+    url: https://fa14561c-ded5-4c17-bd0f-457c4220b7b0.mock.pstmn.io
 info:
   description: Коллекция запросов API сервиса Otium. Сервис предоставляет информацию о фильмах и сериалах, которые доступны на платформе Otium.
   version: "1.0.0"
   title: API сервиса Otium
 tags:
-  - name: API Фильмы
-  - name: API Сериалы
-  - name: API Авторизация
+  - name: Films Server API
+  - name: Series Server API
+  - name: Web Server API
+
 
 paths: 
-  /film/list:
+  /films/list:
     get:
       tags: 
-        - API Фильмы
+        - Films Server API
       summary: Cписок всех фильмов на платформе
       operationId: filmsList
       description: |
         Список всех фильмов на платформе
-      parameters:
-        - in: query
-          name: genre
-          description: жанр фильма (comedy, drama, history)
-          example: comedy
-          required: false
-          schema:
-            type: string
       responses:
         '200':
           description: список фильмов
@@ -47,12 +40,9 @@ paths:
                     - recordUrl
                     - genre
                     - details
-                    - language
-                    - team
-                    - rating
                   properties:
                     id:
-                      type: string
+                      type: integer
                       description: идентификатор
                       example: 104
                     type:
@@ -87,7 +77,7 @@ paths:
                       description: жанр
                       items: 
                         type: string
-                        example: thriller, mystery
+                        example: thriller
                     recommended:
                       type: boolean
                       description: рекомендованный контент
@@ -97,8 +87,6 @@ paths:
                       required:
                           - yearOfIssue
                           - duration
-                          - country
-                          - ageRate
                       properties:
                           yearOfIssue:
                             type: string
@@ -113,45 +101,41 @@ paths:
                             description: страна производства
                             items: 
                               type: string
-                              example: Великобритания, Турция, США
+                              example: Великобритания
                           ageRate:
                             type: string
                             description: возрастной рейтинг
                             example: 12+
                     language:
                       type: object
-                      required:
-                        - original
                       properties:
                           original:
                             type: array
                             description: язык оригинала
                             items:
                               type: string
-                              example: английский, турецкий
+                              example: английский
                           sound:
                             type: array
                             description: язык озвучки
                             items:
                               type: string
-                              example: русский, английский
+                              example: русский
                           subtitle:
                             type: array
                             description: язык субтитров
                             items:
                               type: string
-                              example: русский, английский, турецкий
+                              example: русский
                     team:
                       type: object
-                      required:
-                        - cast
                       properties:
                         cast:
                             type: array
                             description: актёры в главной роли
                             items:
                               type: string
-                              example: Джон Джэксон, Айше Болат
+                              example: Джон Джэксон
                         dubbingTeam:
                             type: array
                             description: актрёры озвучки
@@ -159,19 +143,26 @@ paths:
                               type: string
                               example: null
                     rating:
-                      type: string
-                      example: 7.3
+                      type: integer
+                      description: рейтинг пользователей
+                      example: 6.5
         '400':
           description: bad input parameter
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+        '502':
+          description: bad gateway
           
-  /film:
+  /films:
     get:
       tags: 
-        - API Фильмы
-      summary: Детальное описание фильма
+        - Films Server API
+      summary: Детальное описание фильма по id
       operationId: filmDescription
       description: |
-        Детальное описание фильма
+        Детальное описание фильма по id
       parameters:
         - in: query
           name: id
@@ -197,12 +188,9 @@ paths:
                     - recordUrl
                     - genre
                     - details
-                    - language
-                    - team
-                    - rating
                 properties:
                     id:
-                      type: string
+                      type: integer
                       description: идентификатор
                       example: 104
                     type:
@@ -309,29 +297,26 @@ paths:
                               type: string
                               example: null
                     rating:
-                      type: string
-                      example: 7.3
+                      type: integer
+                      description: рейтинг пользователей
+                      example: 6.5
         '400':
-          description: bad input parameter 
+          description: bad input parameter
         '404':
-          description: id doesn't match
+          description: not found
+        '500':
+          description: internal server error
+        '502':
+          description: bad gateway
 
   /series/list:
     get:
       tags: 
-        - API Сериалы
+        - Series Server API
       summary: Cписок всех сериалов на платформе
       operationId: seriesList
       description: |
         Список всех сериалов на платформе
-      parameters:
-        - in: query
-          name: genre
-          description: жанр сериала (kids, reality, action)
-          example: reality
-          required: false
-          schema:
-            type: string
       responses:
         '200':
           description: список сериалов
@@ -350,53 +335,70 @@ paths:
                     - previewUrl
                     - recordUrl
                     - genre
-                    - recommended
                     - details
                   properties:
                     id:
                       type: integer
+                      description: идентификатор
                       example: 205
                     type:
                       type: string
+                      description: тип контента
                       example: series
                     title:
                       type: string
+                      description: название сериала
                       example: Загадка города Эльдорадо
                     description:
                       type: string
+                      description: описание контента
                       example: Географа подозревают в написании книги, которую он не писал. Герой знакомится с журналисткой мексиканской газеты Глорией, вместе они пытаются раскрыть тайну мифиечкого города.
                     imageUrl: 
                       type: string
+                      description: ссылка на постер
                       format: url
                       example: https://otium.imagestorage.ru/MysteryOfEldorado.img
                     previewUrl: 
                       type: string
+                      description: ссылка на превью видео
                       format: url
                       example: https://otium.previewstorage.ru/MysteryOfEldorado.mov
                     recordUrl: 
                       type: string
+                      description: ссылка на видео
                       format: url
                       example: https://otium.recordstorage.ru/MysteryOfEldorado.mov
                     genre:
                       type: array
+                      description: жанр контента
                       items: 
                         type: string
                         example: action
                     recommended:
                       type: boolean
+                      description: рекомендация
                       example: true
+                    rating:
+                      type: integer
+                      description: рейтинг пользователей
+                      example: 6.5
         '400':
-          description: bad input parameters
+          description: bad input parameter
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+        '502':
+          description: bad gateway
 
-            
   /series:
     get:
       tags: 
-        - API Сериалы
-      summary: Детальное описание сериала
+        - Series Server API
+      summary: Детальное описание сериала по id
       operationId: seriesDescription
       description: |
-        Детальное описание сериала
+        Детальное описание сериала по id
       parameters:
         - in: query
           name: id
@@ -421,43 +423,48 @@ paths:
                     - previewUrl
                     - recordUrl
                     - genre
-                    - recommended
                     - details
-                    - language
-                    - rating
-                    - favorites
                   properties:
                     id:
                       type: integer
+                      description: идентификатор
                       example: 205
                     type:
                       type: string
+                      description: тип контента
                       example: series
                     title:
                       type: string
+                      description: название
                       example: Загадка города Эльдорадо
                     description:
                       type: string
+                      description: описание контента
                       example: Географа подозревают в написании книги, которую он не писал. Герой знакомится с журналисткой мексиканской газеты Глорией, вместе они пытаются раскрыть тайну мифиечкого города.
                     imageUrl: 
                       type: string
+                      description: постер
                       format: url
                       example: https://otium.imagestorage.ru/MysteryOfEldorado.img
                     previewUrl: 
                       type: string
+                      description: превью
                       format: url
                       example: https://otium.previewstorage.ru/MysteryOfEldorado.mov
                     recordUrl: 
                       type: string
+                      description: видео
                       format: url
                       example: https://otium.recordstorage.ru/MysteryOfEldorado.mov
                     genre:
                       type: array
+                      description: жанр контента
                       items: 
                         type: string
                         example: action
                     recommended:
                       type: boolean
+                      description: рекомендация
                       example: true
                     details:
                       type: object
@@ -469,12 +476,15 @@ paths:
                       properties:
                         yearOfIssue:
                                   type: string
+                                  description: год выпуска
                                   example: 2007
                         episodesCount:
                                   type: integer
+                                  description: количество эпизодов
                                   example: 12
                         country:
                                   type: array
+                                  description: страна производства
                                   items: 
                                     type: string
                                     example: Великобритания, Турция, США
@@ -483,110 +493,352 @@ paths:
                                   example: 12+
                     language:
                       type: object
-                      required:
-                        - original
-                        - sound
-                        - subtitle
                       properties:
                         original:
                           type: array
+                          description: язык оригинала
                           items:
                             type: string
                             example: английский, турецкий
                         sound:
                           type: array
+                          description: язык озвучки
                           items:
                             type: string
                             example: русский, английский
                         subtitle:
                           type: array
+                          description: язык субтитров
                           items:
                             type: string
                             example: русский, английский, турецкий
-                        rating:
-                          type: integer
-                          example: 9.3
-                        favorites:
-                          type: boolean
-                          example: false
+                    rating:
+                      type: integer
+                      description: рейтинг пользователей
+                      example: 6.5
           '400':
             description: bad input parameter
           '404':
-            description: id doesn't match
-          
-  /auth:
-    post:
-      tags: 
-        - API Авторизация
-      summary: Вход в Личный кабинет
-      operationId: auth
-      description: |
-        Вход в Личный кабинет
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              items:
-                $ref: '#/components/schemas/auth'
-      responses:
-        '200':
-          description: авторизация прошла успешно
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  type: string
-                  example: success
-        '403':
-          description: вход запрещён, отсутствует логин и/или пароль
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  type: string
-                  example: fail
-  
-  /logout:
-    post:
-      tags: 
-        - API Авторизация
-      summary: Выход из Личного кабинета
-      operationId: logout
-      description: |
-        Выход из Личного кабинета
-      responses:
-        '200':
-          description: успешный выход из Личного кабинета
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  type: string
-                  example: success
-        '403':
-          description: ошибка выхода из Личного кабинета
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  type: string
-                  example: fail
+            description: not found
+          '500':
+            description: internal server error
+          '502':
+            description: bad gateway
 
-    
-components:
-  schemas:
-    auth:
-        type: object
-        required:
-          - login
-          - password
-        properties:
-          login:
+  /content/list:
+    get:
+      tags: 
+        - Web Server API
+      summary: Список всех фильмов и сериалов на платформе
+      operationId: contentList
+      description: |
+        Список всех фильмов и сериалов на платформе
+      parameters:
+        - in: query
+          name: type
+          description: фильтр по типу контента (film, serie)
+          example: serie
+          required: false
+          schema:
             type: string
-          password:
+#        - in: query
+#         name: genre
+#         description: фильтр по жанру (comedy, drama, kids, reality, action)
+#         example: comedy
+#         required: false
+#         schema:
+#           type: string
+      responses:
+        '200':
+          description: список контента на платформе
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - type
+                    - title
+                    - description
+                    - imageUrl
+                    - previewUrl
+                    - recordUrl
+                    - genre
+                    - details
+                  properties:
+                    id:
+                      type: integer
+                      description: идентификатор
+                      example: 104
+                    type:
+                      type: string
+                      description: тип контента
+                      example: film
+                    title:
+                      type: string
+                      description: название
+                      example: Ребус Атлантиды
+                    description:
+                      type: string
+                      description: короткое описание
+                      example: Археолога подозревают в преступлении, которого он не совершал. Герой знакомится с историком турецкой полиции Шехер Джан, вместе они пытаются раскрыть тайну.
+                    imageUrl: 
+                      type: string
+                      description: постер
+                      format: url
+                      example: https://otium.imagestorage.ru/RebusOfAtlantis.img
+                    previewUrl: 
+                      type: string
+                      description: превью
+                      format: url
+                      example: https://otium.previewstorage.ru/RebusOfAtlantis.mov
+                    recordUrl: 
+                      type: string
+                      description: url видео-файла
+                      format: url
+                      example: https://otium.recordstorage.ru/RebusOfAtlantis.mov
+                    genre:
+                      type: array
+                      description: жанр
+                      items: 
+                        type: string
+                        example: thriller, mystery
+                    recommended:
+                      type: boolean
+                      description: рекомендованный контент
+                      example: true
+                    details:
+                      type: object
+                      required:
+                          - yearOfIssue
+                          - duration
+                          - country
+                          - ageRate
+                      properties:
+                          yearOfIssue:
+                            type: string
+                            description: год производства
+                            example: 2007
+                          duration:
+                            type: integer
+                            description: продолжительность (в минутах)
+                            example: 159
+                          country:
+                            type: array
+                            description: страна производства
+                            items: 
+                              type: string
+                              example: Великобритания, Турция, США
+                          ageRate:
+                            type: string
+                            description: возрастной рейтинг
+                            example: 12+
+                    language:
+                      type: object
+                      properties:
+                          original:
+                            type: array
+                            description: язык оригинала
+                            items:
+                              type: string
+                              example: английский, турецкий
+                          sound:
+                            type: array
+                            description: язык озвучки
+                            items:
+                              type: string
+                              example: русский, английский
+                          subtitle:
+                            type: array
+                            description: язык субтитров
+                            items:
+                              type: string
+                              example: русский, английский, турецкий
+                    team:
+                      type: object
+                      properties:
+                        cast:
+                            type: array
+                            description: актёры в главной роли
+                            items:
+                              type: string
+                              example: Джон Джэксон, Айше Болат
+                        dubbingTeam:
+                            type: array
+                            description: актрёры озвучки
+                            items: 
+                              type: string
+                              example: null
+                    rating:
+                      type: integer
+                      description: рейтинг пользователей
+                      example: 6.5
+        '400':
+          description: bad input parameter
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+        '502':
+          description: bad gateway
+
+  /content/details:
+    get:
+      tags: 
+        - Web Server API
+      summary: Детальное описание контента на платформе по id
+      operationId: contentDetails
+      description: |
+        Детальное описание контента на платформе по id
+      parameters:
+        - in: query
+          name: type
+          description: фильтр по типу контента (film, serie)
+          example: serie
+          required: true
+          schema:
             type: string
+        - in: query
+          name: id
+          description: идентификатор сериала (201, 202, 203, 204)
+          example: 204
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: детальное описание контента на платформе по id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - type
+                    - title
+                    - description
+                    - imageUrl
+                    - previewUrl
+                    - recordUrl
+                    - genre
+                    - details
+                  properties:
+                    id:
+                      type: string
+                      description: идентификатор
+                      example: 104
+                    type:
+                      type: string
+                      description: тип контента
+                      example: film
+                    title:
+                      type: string
+                      description: название
+                      example: Ребус Атлантиды
+                    description:
+                      type: string
+                      description: короткое описание
+                      example: Археолога подозревают в преступлении, которого он не совершал. Герой знакомится с историком турецкой полиции Шехер Джан, вместе они пытаются раскрыть тайну.
+                    imageUrl: 
+                      type: string
+                      description: постер
+                      format: url
+                      example: https://otium.imagestorage.ru/RebusOfAtlantis.img
+                    previewUrl: 
+                      type: string
+                      description: превью
+                      format: url
+                      example: https://otium.previewstorage.ru/RebusOfAtlantis.mov
+                    recordUrl: 
+                      type: string
+                      description: url видео-файла
+                      format: url
+                      example: https://otium.recordstorage.ru/RebusOfAtlantis.mov
+                    genre:
+                      type: array
+                      description: жанр
+                      items: 
+                        type: string
+                        example: thriller, mystery
+                    recommended:
+                      type: boolean
+                      description: рекомендованный контент
+                      example: true
+                    details:
+                      type: object
+                      required:
+                          - yearOfIssue
+                          - duration
+                          - country
+                          - ageRate
+                      properties:
+                          yearOfIssue:
+                            type: string
+                            description: год производства
+                            example: 2007
+                          duration:
+                            type: integer
+                            description: продолжительность (в минутах)
+                            example: 159
+                          country:
+                            type: array
+                            description: страна производства
+                            items: 
+                              type: string
+                              example: Великобритания, Турция, США
+                          ageRate:
+                            type: string
+                            description: возрастной рейтинг
+                            example: 12+
+                    language:
+                      type: object
+                      properties:
+                          original:
+                            type: array
+                            description: язык оригинала
+                            items:
+                              type: string
+                              example: английский, турецкий
+                          sound:
+                            type: array
+                            description: язык озвучки
+                            items:
+                              type: string
+                              example: русский, английский
+                          subtitle:
+                            type: array
+                            description: язык субтитров
+                            items:
+                              type: string
+                              example: русский, английский, турецкий
+                    team:
+                      type: object
+                      properties:
+                        cast:
+                            type: array
+                            description: актёры в главной роли
+                            items:
+                              type: string
+                              example: Джон Джэксон, Айше Болат
+                        dubbingTeam:
+                            type: array
+                            description: актрёры озвучки
+                            items: 
+                              type: string
+                              example: null
+                    rating:
+                      type: integer
+                      description: рейтинг пользователей
+                      example: 6.5
+        '400':
+          description: bad input parameter
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+        '502':
+          description: bad gateway
