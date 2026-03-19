@@ -324,7 +324,6 @@ paths:
           required: false
           schema:
             type: string
-            enum: [kids, reality, action]
             example: reality
       responses:
         '200':
