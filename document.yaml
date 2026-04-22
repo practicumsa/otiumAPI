@@ -297,7 +297,7 @@ paths:
                               type: string
                               example: null
                     rating:
-                      type: integer
+                      type: string
                       description: рейтинг пользователей
                       example: 6.5
         '400':
